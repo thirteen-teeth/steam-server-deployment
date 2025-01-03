@@ -27,3 +27,23 @@ variable "domain_name" {
     description = "The domain name to use for the Steam server"
     type = string
 }
+
+variable "ingress_ports_map" {
+    description = "Map of inbound ports to open"
+    type = map
+}
+
+variable "subnet_cidr_block" {
+    description = "The CIDR block for the subnet"
+    type = string
+}
+
+variable "availability_zone" {
+    description = "The availability zone for the subnet"
+    type = string
+}
+
+variable "vpc_cidr_block" {
+    description = "The CIDR block for the VPC"
+    type = string  
+}

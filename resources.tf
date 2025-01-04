@@ -36,7 +36,6 @@ resource "aws_vpc_security_group_egress_rule" "steam_server_egress" {
     }
 }
 
-# Create an EC2 instance
 resource "aws_instance" "steam_server" {
     ami = var.instance_ami
     instance_type = var.instance_type
@@ -47,6 +46,11 @@ resource "aws_instance" "steam_server" {
         Name = "steam_server"
     }
     associate_public_ip_address = true
+    user_data = file("install-docker.sh")
+    root_block_device {
+        volume_size = 128
+        volume_type = "gp3"
+    }
 }
 
 # create A from Public IPv4 DNS to Route53 domain

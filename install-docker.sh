@@ -2,7 +2,7 @@
 set -euo pipefail
 exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
 
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do apt-get remove $pkg; done
+apt-get remove -y docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc || true
 
 apt-get update
 apt-get -y install ca-certificates curl

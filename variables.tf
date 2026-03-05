@@ -45,7 +45,12 @@ variable "games" {
             container_port = number
             protocol       = string
         }))
-        volume_path      = string
+        volumes = list(object({
+            name_suffix    = string
+            container_path = string
+        }))
+        entrypoint       = optional(string, "")
+        cmd_args         = optional(string, "")
         data_volume_size = optional(number, 20)
     }))
     default = {}

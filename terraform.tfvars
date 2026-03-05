@@ -12,13 +12,15 @@ games = {
   valheim = {
     app_id       = "896660"
     docker_image = "cm2network/valheim"
-    volume_path  = "/home/steam/valheim-dedicated"
     data_volume_size = 10
     env_vars = {
       SERVER_PORT     = "2456"
       SERVER_NAME     = "My Valheim Server"
       SERVER_PASSWORD = "changeme"
     }
+    volumes = [
+      { name_suffix = "data", container_path = "/home/steam/valheim-dedicated" }
+    ]
     ports = [
       { host_port = 2456, container_port = 2456, protocol = "udp" },
       { host_port = 2457, container_port = 2457, protocol = "udp" },
@@ -29,16 +31,41 @@ games = {
   enshrouded = {
     app_id       = "2278520"
     docker_image = "sknnr/enshrouded-dedicated-server:latest"
-    volume_path  = "/home/steam/enshrouded/savegame"
     data_volume_size = 20
     env_vars = {
       SERVER_NAME     = "My Enshrouded Server"
       SERVER_SLOTS    = "16"
       SERVER_PASSWORD = "changeme"
     }
+    volumes = [
+      { name_suffix = "data", container_path = "/home/steam/enshrouded/savegame" }
+    ]
     ports = [
       { host_port = 15636, container_port = 15636, protocol = "udp" },
       { host_port = 15637, container_port = 15637, protocol = "udp" }
+    ]
+  }
+  vrising = {
+    app_id           = "1829350"
+    docker_image     = "trueosiris/vrising:latest"
+    data_volume_size = 15
+    entrypoint       = "/bin/bash"
+    cmd_args         = "-c \"sed -i 's/\\r//g' /start.sh && exec /bin/bash /start.sh\""
+    env_vars = {
+      TZ         = "America/New_York"
+      SERVERNAME = "My V Rising Server"
+      WORLDNAME  = "world1"
+      GAMEPORT   = "9876"
+      QUERYPORT  = "9877"
+      WINEDEBUG  = "fixme-all"
+    }
+    volumes = [
+      { name_suffix = "server",          container_path = "/mnt/vrising/server" },
+      { name_suffix = "persistentdata",  container_path = "/mnt/vrising/persistentdata" }
+    ]
+    ports = [
+      { host_port = 9876, container_port = 9876, protocol = "udp" },
+      { host_port = 9877, container_port = 9877, protocol = "udp" }
     ]
   }
 }

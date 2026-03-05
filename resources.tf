@@ -16,14 +16,16 @@ locals {
     # Build docker run commands for each game
     game_run_commands = join("\n\n", [
         for game_name, game in var.games : join(" \\\n  ", concat(
-            ["# --- ${game_name} ---\ndocker volume create ${game_name}-persistent-data\ndocker run"],
+            ["# --- ${game_name} ---\n${join("\n", [for v in game.volumes : "docker volume create ${game_name}-${v.name_suffix}"])}\ndocker run"],
             ["--detach"],
             ["--restart unless-stopped"],
             ["--name ${game_name}-server"],
-            ["--mount type=volume,source=${game_name}-persistent-data,target=${game.volume_path}"],
+            [for v in game.volumes : "--mount type=volume,source=${game_name}-${v.name_suffix},target=${v.container_path}"],
             [for port in game.ports : "--publish ${port.host_port}:${port.container_port}/${port.protocol}"],
             [for k, v in game.env_vars : "--env ${k}='${v}'"],
-            [game.docker_image]
+            game.entrypoint != "" ? ["--entrypoint \"${game.entrypoint}\""] : [],
+            [game.docker_image],
+            game.cmd_args != "" ? [game.cmd_args] : []
         ))
     ])
 
@@ -91,8 +93,9 @@ resource "aws_instance" "steam_server" {
     key_name                    = aws_key_pair.deployer.key_name
     subnet_id                   = aws_subnet.steam_server_subnet.id
     vpc_security_group_ids      = [aws_security_group.steam_server_sg.id]
-    associate_public_ip_address  = true
-    user_data                    = local.user_data
+    associate_public_ip_address = true
+    user_data                   = local.user_data
+    user_data_replace_on_change = true
     tags = {
         Name  = "steam_server"
         Games = join(",", keys(var.games))

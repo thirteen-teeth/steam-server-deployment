@@ -1,6 +1,12 @@
 variable "instance_type" {
-    description = "The type of EC2 instance to launch"
-    type = string
+    description = "EC2 instance type - recommend at least t3.xlarge for multiple games"
+    type        = string
+    default     = "t3.xlarge"
+
+    validation {
+        condition     = !contains(["t2.micro", "t3.micro", "t3.small"], var.instance_type)
+        error_message = "Instance type is too small for running multiple game servers. Use at least t3.medium."
+    }
 }
 
 variable "instance_ami" {
@@ -28,9 +34,21 @@ variable "domain_name" {
     type = string
 }
 
-variable "ingress_ports_map" {
-    description = "Map of inbound ports to open"
-    type = map
+variable "games" {
+    description = "Map of game server configurations"
+    type = map(object({
+        app_id       = string
+        docker_image = string
+        env_vars     = map(string)
+        ports        = list(object({
+            host_port      = number
+            container_port = number
+            protocol       = string
+        }))
+        volume_path      = string
+        data_volume_size = optional(number, 20)
+    }))
+    default = {}
 }
 
 variable "subnet_cidr_block" {

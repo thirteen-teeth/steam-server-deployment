@@ -1,3 +1,38 @@
+locals {
+    # Flatten all ports across all games into a map keyed by a unique string
+    all_game_ports_map = {
+        for item in flatten([
+            for game_name, game in var.games : [
+                for port in game.ports : {
+                    key       = "${game_name}-${port.host_port}-${port.protocol}"
+                    from_port = port.host_port
+                    to_port   = port.host_port
+                    protocol  = port.protocol
+                }
+            ]
+        ]) : item.key => item
+    }
+
+    # Build docker run commands for each game
+    game_run_commands = join("\n\n", [
+        for game_name, game in var.games : join(" \\\n  ", concat(
+            ["# --- ${game_name} ---\ndocker volume create ${game_name}-persistent-data\ndocker run"],
+            ["--detach"],
+            ["--restart unless-stopped"],
+            ["--name ${game_name}-server"],
+            ["--mount type=volume,source=${game_name}-persistent-data,target=${game.volume_path}"],
+            [for port in game.ports : "--publish ${port.host_port}:${port.container_port}/${port.protocol}"],
+            [for k, v in game.env_vars : "--env ${k}='${v}'"],
+            [game.docker_image]
+        ))
+    ])
+
+    user_data = join("\n\n", [
+        file("install-docker.sh"),
+        local.game_run_commands
+    ])
+}
+
 # Create a key pair
 resource "aws_key_pair" "deployer" {
     key_name   = var.key_name
@@ -6,22 +41,36 @@ resource "aws_key_pair" "deployer" {
 
 # Create a security group for the Steam server
 resource "aws_security_group" "steam_server_sg" {
-    name = "steam_server_sg"
+    name        = "steam_server_sg"
     description = "Security group for the Steam server"
-    vpc_id = aws_vpc.steam_server_vpc.id
+    vpc_id      = aws_vpc.steam_server_vpc.id
     tags = {
-        Name = "steam_server_sg"
+        Name  = "steam_server_sg"
+        Games = join(",", keys(var.games))
     }
 }
 
-# Loop through the inbound_ports_map variable to create inbound rules
-resource "aws_vpc_security_group_ingress_rule" "steam_server_ingress" {
-    for_each = var.ingress_ports_map
+# SSH ingress rule
+resource "aws_vpc_security_group_ingress_rule" "ssh" {
     security_group_id = aws_security_group.steam_server_sg.id
-    from_port = each.value.from_port
-    to_port = each.value.to_port
-    ip_protocol = each.value.protocol
-    cidr_ipv4 = "0.0.0.0/0"
+    cidr_ipv4         = "0.0.0.0/0"
+    from_port         = 22
+    to_port           = 22
+    ip_protocol       = "tcp"
+    tags = {
+        Name = "steam_server_ingress-ssh"
+    }
+}
+
+# Game port ingress rules - one per unique game port
+resource "aws_vpc_security_group_ingress_rule" "game_ports" {
+    for_each = local.all_game_ports_map
+
+    security_group_id = aws_security_group.steam_server_sg.id
+    cidr_ipv4         = "0.0.0.0/0"
+    from_port         = each.value.from_port
+    to_port           = each.value.to_port
+    ip_protocol       = each.value.protocol
     tags = {
         Name = "steam_server_ingress-${each.key}"
     }
@@ -29,24 +78,25 @@ resource "aws_vpc_security_group_ingress_rule" "steam_server_ingress" {
 
 resource "aws_vpc_security_group_egress_rule" "steam_server_egress" {
     security_group_id = aws_security_group.steam_server_sg.id
-    ip_protocol = "-1"
-    cidr_ipv4 = "0.0.0.0/0"
+    ip_protocol       = "-1"
+    cidr_ipv4         = "0.0.0.0/0"
     tags = {
         Name = "steam_server_egress"
     }
 }
 
 resource "aws_instance" "steam_server" {
-    ami = var.instance_ami
-    instance_type = var.instance_type
-    key_name = aws_key_pair.deployer.key_name
-    subnet_id = aws_subnet.steam_server_subnet.id
-    vpc_security_group_ids = [aws_security_group.steam_server_sg.id]
+    ami                         = var.instance_ami
+    instance_type               = var.instance_type
+    key_name                    = aws_key_pair.deployer.key_name
+    subnet_id                   = aws_subnet.steam_server_subnet.id
+    vpc_security_group_ids      = [aws_security_group.steam_server_sg.id]
+    associate_public_ip_address  = true
+    user_data                    = local.user_data
     tags = {
-        Name = "steam_server"
+        Name  = "steam_server"
+        Games = join(",", keys(var.games))
     }
-    associate_public_ip_address = true
-    user_data = file("install-docker.sh")
     root_block_device {
         volume_size = 128
         volume_type = "gp3"

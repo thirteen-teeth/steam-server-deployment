@@ -1,6 +1,6 @@
-#!/usr/bin bash
-
-# docker run -it --name=steamcmd cm2network/steamcmd bash
+#!/bin/bash
+set -euo pipefail
+exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
 
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do apt-get remove $pkg; done
 
@@ -19,8 +19,3 @@ apt-get update
 
 VERSION_STRING=5:27.4.0-1~ubuntu.24.04~noble
 apt-get -y install docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING containerd.io docker-buildx-plugin docker-compose-plugin
-
-mkdir /opt/valheim-data
-chmod 777 /opt/valheim-data
-
-docker run -d --net=host -v "/opt/valheim-data:/home/steam/valheim-dedicated/" -e SERVER_PORT=2456 --name=valheim-dedicated cm2network/valheim

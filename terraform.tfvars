@@ -8,30 +8,37 @@ domain_name       = "steam.thirteenteeth.com"
 vpc_cidr_block    = "172.16.0.0/16"
 subnet_cidr_block = "172.16.10.0/24"
 availability_zone = "us-east-1a"
-ingress_ports_map = {
-  inbound-ssh-tcp = {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
+games = {
+  valheim = {
+    app_id       = "896660"
+    docker_image = "cm2network/valheim"
+    volume_path  = "/home/steam/valheim-dedicated"
+    data_volume_size = 10
+    env_vars = {
+      SERVER_PORT     = "2456"
+      SERVER_NAME     = "My Valheim Server"
+      SERVER_PASSWORD = "changeme"
+    }
+    ports = [
+      { host_port = 2456, container_port = 2456, protocol = "udp" },
+      { host_port = 2457, container_port = 2457, protocol = "udp" },
+      { host_port = 2456, container_port = 2456, protocol = "tcp" },
+      { host_port = 2457, container_port = 2457, protocol = "tcp" }
+    ]
   }
-  inbound-steam-udp = {
-    from_port = 2456
-    to_port   = 2457
-    protocol  = "udp"
-  }
-  inbound-steam-tcp = {
-    from_port = 2456
-    to_port   = 2457
-    protocol  = "tcp"
-  }
-  inbound-enshrouded-udp = {
-    from_port = 15636
-    to_port   = 15637
-    protocol  = "udp"
-  }
-  inbound-enshrouded-tcp = {
-    from_port = 15636
-    to_port   = 15637
-    protocol  = "tcp"
+  enshrouded = {
+    app_id       = "2278520"
+    docker_image = "sknnr/enshrouded-dedicated-server:latest"
+    volume_path  = "/home/steam/enshrouded/savegame"
+    data_volume_size = 20
+    env_vars = {
+      SERVER_NAME     = "My Enshrouded Server"
+      SERVER_SLOTS    = "16"
+      SERVER_PASSWORD = "changeme"
+    }
+    ports = [
+      { host_port = 15636, container_port = 15636, protocol = "udp" },
+      { host_port = 15637, container_port = 15637, protocol = "udp" }
+    ]
   }
 }

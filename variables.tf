@@ -48,12 +48,20 @@ variable "games" {
         volumes = list(object({
             name_suffix    = string
             container_path = string
+            backup         = optional(bool, true)
         }))
         entrypoint       = optional(string, "")
         cmd_args         = optional(string, "")
         data_volume_size = optional(number, 20)
     }))
     default = {}
+}
+
+variable "game_secrets" {
+    description = "Per-game secret env vars (e.g. tokens, passwords) merged over game env_vars at apply time. Store in secrets.tfvars and keep out of git."
+    type        = map(map(string))
+    sensitive   = true
+    default     = {}
 }
 
 variable "subnet_cidr_block" {

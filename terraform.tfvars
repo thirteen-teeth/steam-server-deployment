@@ -16,7 +16,6 @@ games = {
     env_vars = {
       SERVER_PORT     = "2456"
       SERVER_NAME     = "My Valheim Server"
-      SERVER_PASSWORD = "changeme"
     }
     volumes = [
       { name_suffix = "data", container_path = "/home/steam/valheim-dedicated" }
@@ -35,7 +34,6 @@ games = {
     env_vars = {
       SERVER_NAME     = "My Enshrouded Server"
       SERVER_SLOTS    = "16"
-      SERVER_PASSWORD = "changeme"
     }
     volumes = [
       { name_suffix = "data", container_path = "/home/steam/enshrouded/savegame" }
@@ -60,12 +58,35 @@ games = {
       WINEDEBUG  = "fixme-all"
     }
     volumes = [
-      { name_suffix = "server",          container_path = "/mnt/vrising/server" },
-      { name_suffix = "persistentdata",  container_path = "/mnt/vrising/persistentdata" }
+      { name_suffix = "server",         container_path = "/mnt/vrising/server",         backup = false },
+      { name_suffix = "persistentdata", container_path = "/mnt/vrising/persistentdata", backup = true }
     ]
     ports = [
       { host_port = 9876, container_port = 9876, protocol = "udp" },
       { host_port = 9877, container_port = 9877, protocol = "udp" }
+    ]
+  }
+  tf2 = {
+    app_id           = "440"
+    docker_image     = "cm2network/tf2:latest"
+    data_volume_size = 10
+    env_vars = {
+      SRCDS_TOKEN      = "" # set in secrets.tfvars (gitignored)
+      SRCDS_HOSTNAME   = "My TF2 Server"
+      SRCDS_PORT       = "27015"
+      SRCDS_TV_PORT    = "27020"
+      SRCDS_MAXPLAYERS = "24"
+      SRCDS_STARTMAP   = "ctf_2fort"
+      SRCDS_TICKRATE   = "66"
+      SRCDS_REGION     = "3"
+    }
+    volumes = [
+      { name_suffix = "data", container_path = "/home/steam/tf-dedicated", backup = true }
+    ]
+    ports = [
+      { host_port = 27015, container_port = 27015, protocol = "udp" },
+      { host_port = 27015, container_port = 27015, protocol = "tcp" },
+      { host_port = 27020, container_port = 27020, protocol = "udp" }
     ]
   }
 }

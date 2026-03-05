@@ -12,3 +12,16 @@ output "game_connection_info" {
         }
     }
 }
+
+output "backup_config" {
+    description = "Game backup configuration consumed by backup-games.sh and restore-games.sh"
+    value = {
+        for game_name, game in var.games : game_name => {
+            container = "${game_name}-server"
+            volumes   = [
+                for v in game.volumes : "${game_name}-${v.name_suffix}"
+                if v.backup
+            ]
+        }
+    }
+}

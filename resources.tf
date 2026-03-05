@@ -22,7 +22,7 @@ locals {
             ["--name ${game_name}-server"],
             [for v in game.volumes : "--mount type=volume,source=${game_name}-${v.name_suffix},target=${v.container_path}"],
             [for port in game.ports : "--publish ${port.host_port}:${port.container_port}/${port.protocol}"],
-            [for k, v in game.env_vars : "--env ${k}='${v}'"],
+            [for k, v in merge(game.env_vars, lookup(var.game_secrets, game_name, {})) : "--env ${k}='${v}'"],
             game.entrypoint != "" ? ["--entrypoint \"${game.entrypoint}\""] : [],
             [game.docker_image],
             game.cmd_args != "" ? [game.cmd_args] : []

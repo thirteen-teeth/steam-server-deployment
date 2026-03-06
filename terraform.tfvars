@@ -9,40 +9,40 @@ vpc_cidr_block    = "172.16.0.0/16"
 subnet_cidr_block = "172.16.10.0/24"
 availability_zone = "us-east-1a"
 games = {
-  valheim = {
-    app_id       = "896660"
-    docker_image = "cm2network/valheim"
-    data_volume_size = 10
-    env_vars = {
-      SERVER_PORT     = "2456"
-      SERVER_NAME     = "My Valheim Server"
-    }
-    volumes = [
-      { name_suffix = "data", container_path = "/home/steam/valheim-dedicated" }
-    ]
-    ports = [
-      { host_port = 2456, container_port = 2456, protocol = "udp" },
-      { host_port = 2457, container_port = 2457, protocol = "udp" },
-      { host_port = 2456, container_port = 2456, protocol = "tcp" },
-      { host_port = 2457, container_port = 2457, protocol = "tcp" }
-    ]
-  }
-  enshrouded = {
-    app_id       = "2278520"
-    docker_image = "sknnr/enshrouded-dedicated-server:latest"
-    data_volume_size = 20
-    env_vars = {
-      SERVER_NAME     = "My Enshrouded Server"
-      SERVER_SLOTS    = "16"
-    }
-    volumes = [
-      { name_suffix = "data", container_path = "/home/steam/enshrouded/savegame" }
-    ]
-    ports = [
-      { host_port = 15636, container_port = 15636, protocol = "udp" },
-      { host_port = 15637, container_port = 15637, protocol = "udp" }
-    ]
-  }
+  # valheim = {
+  #   app_id       = "896660"
+  #   docker_image = "cm2network/valheim"
+  #   data_volume_size = 10
+  #   env_vars = {
+  #     SERVER_PORT     = "2456"
+  #     SERVER_NAME     = "My Valheim Server"
+  #   }
+  #   volumes = [
+  #     { name_suffix = "data", container_path = "/home/steam/valheim-dedicated" }
+  #   ]
+  #   ports = [
+  #     { host_port = 2456, container_port = 2456, protocol = "udp" },
+  #     { host_port = 2457, container_port = 2457, protocol = "udp" },
+  #     { host_port = 2456, container_port = 2456, protocol = "tcp" },
+  #     { host_port = 2457, container_port = 2457, protocol = "tcp" }
+  #   ]
+  # }
+  # enshrouded = {
+  #   app_id       = "2278520"
+  #   docker_image = "sknnr/enshrouded-dedicated-server:latest"
+  #   data_volume_size = 20
+  #   env_vars = {
+  #     SERVER_NAME     = "My Enshrouded Server"
+  #     SERVER_SLOTS    = "16"
+  #   }
+  #   volumes = [
+  #     { name_suffix = "data", container_path = "/home/steam/enshrouded/savegame" }
+  #   ]
+  #   ports = [
+  #     { host_port = 15636, container_port = 15636, protocol = "udp" },
+  #     { host_port = 15637, container_port = 15637, protocol = "udp" }
+  #   ]
+  # }
   vrising = {
     app_id           = "1829350"
     docker_image     = "trueosiris/vrising:latest"

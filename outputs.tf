@@ -1,3 +1,8 @@
+output "instance_id" {
+    description = "EC2 instance ID - used by Makefile stop-server / start-server targets"
+    value       = aws_instance.steam_server.id
+}
+
 output "instance_public_ip" {
     value = aws_instance.steam_server.public_ip
 }

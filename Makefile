@@ -1,4 +1,4 @@
-.PHONY: setup lint validate plan apply destroy ssh backup restore stop-server start-server help
+.PHONY: setup lint validate plan apply destroy ssh backup restore stop-server start-server vrising-settings-init vrising-settings-upload help
 
 TFVARS_FILE  := terraform.tfvars
 SECRETS_FILE := secrets.tfvars
@@ -8,21 +8,27 @@ SSH_HOST     := steam.thirteenteeth.com
 AWS_REGION   := us-east-1
 
 help:
-	@echo "Usage: make <target>"
-	@echo ""
-	@echo "Targets:"
-	@echo "  setup     Install terraform and tflint"
-	@echo "  lint      Run tflint"
-	@echo "  validate  Run terraform validate"
-	@echo "  check     Run lint and validate"
-	@echo "  plan      Run terraform plan"
-	@echo "  apply     Run terraform apply"
-	@echo "  destroy   Run terraform destroy"
-	@echo "  ssh       Clear known_hosts entry and SSH into the server"
-	@echo "  backup       Rsync all game volumes to ~/backups/steam-servers"
-	@echo "  restore      Restore game volumes from a local backup (see restore-games.sh)"
-	@echo "  stop-server  Stop the EC2 instance to save costs (preserves all data)"
-	@echo "  start-server Start the EC2 instance again"
+	@printf "\n"
+	@printf "Steam Server Deployment\n"
+	@printf "=======================\n"
+	@printf "Usage: make <target>\n\n"
+	@printf "Terraform\n"
+	@printf "  %-24s %s\n" "setup" "Install tflint and run terraform init"
+	@printf "  %-24s %s\n" "lint" "Run tflint"
+	@printf "  %-24s %s\n" "validate" "Run terraform validate"
+	@printf "  %-24s %s\n" "check" "Run lint and validate"
+	@printf "  %-24s %s\n" "plan" "Run terraform plan"
+	@printf "  %-24s %s\n" "apply" "Run terraform apply"
+	@printf "  %-24s %s\n\n" "destroy" "Run terraform destroy"
+	@printf "Operations\n"
+	@printf "  %-24s %s\n" "ssh" "Refresh known_hosts entry and SSH in"
+	@printf "  %-24s %s\n" "backup" "Rsync game volumes to ~/backups/steam-servers"
+	@printf "  %-24s %s\n" "restore" "Restore game volumes from a local backup"
+	@printf "  %-24s %s\n" "stop-server" "Stop EC2 instance (data is preserved)"
+	@printf "  %-24s %s\n\n" "start-server" "Start the EC2 instance again"
+	@printf "V Rising\n"
+	@printf "  %-24s %s\n" "vrising-settings-init" "Extract default V Rising settings files locally"
+	@printf "  %-24s %s\n" "vrising-settings-upload" "Upload V Rising settings files and restart"
 
 setup:
 	@echo "==> Installing tflint..."
@@ -80,3 +86,9 @@ start-server:
 	@echo "==> Instance running. Waiting for status checks..."
 	aws ec2 wait instance-status-ok --region $(AWS_REGION) --instance-ids $(INSTANCE_ID)
 	@echo "==> Ready. Connect with: make ssh"
+
+vrising-settings-init:
+	bash vrising-settings-init.sh
+
+vrising-settings-upload:
+	SSH_KEY="$(SSH_KEY)" REMOTE_USER="$(SSH_USER)" REMOTE_HOST="$(SSH_HOST)" bash upload-vrising-settings.sh

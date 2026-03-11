@@ -58,7 +58,7 @@ games = {
       WINEDEBUG  = "fixme-all"
     }
     volumes = [
-      { name_suffix = "server",         container_path = "/mnt/vrising/server",         backup = false },
+      { name_suffix = "server", container_path = "/mnt/vrising/server", backup = false },
       { name_suffix = "persistentdata", container_path = "/mnt/vrising/persistentdata", backup = true }
     ]
     ports = [

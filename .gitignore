@@ -1,3 +1,5 @@
+configs/vrising/ServerHostSettings.json
+configs/vrising/ServerGameSettings.json
 .env
 .terraform
 terraform.tfstate

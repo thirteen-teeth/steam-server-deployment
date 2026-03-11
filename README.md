@@ -162,6 +162,39 @@ terraform destroy
 
 ## Game Server Reference Commands
 
+## V Rising Settings Management
+
+This project supports managing both V Rising settings files locally and bind-mounting them into the V Rising container:
+
+- `ServerHostSettings.json`
+- `ServerGameSettings.json`
+
+1. Extract defaults locally (uses `docker exec`):
+    ```bash
+    make vrising-settings-init
+    ```
+    First run can take several minutes while the temporary container initializes game files.
+
+2. Edit local files:
+    ```bash
+    ./configs/vrising/ServerHostSettings.json
+    ./configs/vrising/ServerGameSettings.json
+    ```
+
+3. Upload to your server and restart only V Rising:
+    ```bash
+    make vrising-settings-upload
+    ```
+
+4. Ensure Terraform deploy uses the bind mount (first time / after infra changes):
+    ```bash
+    make apply
+    ```
+
+Files are uploaded to `/opt/game-configs/vrising/` on the EC2 host, and Terraform bind-mounts that directory into the container at `/mnt/vrising/persistentdata/Settings`.
+
+---
+
 ### Valheim
 
 ```bash
